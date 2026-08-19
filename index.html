@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="description" content="Teaching Tracker - bilingual lecture preparation, courseware, tasks and reminders workspace">
+  <title>Teaching Tracker</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./assets/icon-192.png">
+  <link rel="apple-touch-icon" href="./assets/icon-192.png">
+  <link rel="stylesheet" href="./css/app.css">
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><div class="brand-mark">TT</div><div><strong>Teaching Tracker</strong><span data-zh="讲师备课工作台" data-en="Lecture Prep Workspace">讲师备课工作台</span></div></div>
+    <nav class="nav-list">
+      <button class="nav-item active" data-view="today"><span class="nav-icon" aria-hidden="true">⌂</span><span class="nav-label" data-zh="今天" data-en="Today">今天</span></button>
+      <button class="nav-item" data-view="tasks"><span class="nav-icon" aria-hidden="true">✓</span><span class="nav-label" data-zh="任务" data-en="Tasks">任务</span></button>
+      <button class="nav-item" data-view="courses"><span class="nav-icon" aria-hidden="true">▣</span><span class="nav-label" data-zh="课程" data-en="Courses">课程</span></button>
+      <button class="nav-item" data-view="calendar"><span class="nav-icon" aria-hidden="true">□</span><span class="nav-label" data-zh="日历" data-en="Calendar">日历</span></button>
+      <button class="nav-item" data-view="files"><span class="nav-icon" aria-hidden="true">⇩</span><span class="nav-label" data-zh="课件" data-en="Courseware">课件</span></button>
+      <button class="nav-item" data-view="settings"><span class="nav-icon" aria-hidden="true">⚙</span><span class="nav-label" data-zh="设置" data-en="Settings">设置</span></button>
+    </nav>
+    <div class="sidebar-footer"><div class="sync-pill" id="syncPill"><span class="sync-dot"></span><span>Demo · Local</span></div><small data-zh="V1.2.1 · 中文布局优化" data-en="V1.2.1 · CJK layout polish">V1.2.1 · 中文布局优化</small></div>
+  </aside>
+
+  <main class="main-area">
+    <header class="topbar">
+      <div><p class="eyebrow" id="pageEyebrow">Teaching workspace</p><h1 id="pageTitle">Today</h1></div>
+      <div class="topbar-actions">
+        <div class="lang-switch" role="group" aria-label="Language"><button type="button" data-lang="zh">中</button><button type="button" data-lang="en">EN</button></div>
+        <button class="button ghost account-button" id="accountBtn" data-action="open-auth"><span class="account-icon">◎</span><span id="accountBtnText">登入</span></button>
+        <button class="button ghost desktop-only" id="installBtn" hidden><span data-zh="安装 App" data-en="Install App">安装 App</span></button>
+        <button class="button ghost desktop-only" data-action="add-course"><span data-zh="+ 课程" data-en="+ Course">+ 课程</span></button>
+        <button class="button primary" data-action="add-task"><span data-zh="+ 任务" data-en="+ Task">+ 任务</span></button>
+      </div>
+    </header>
+    <div id="authBanner" class="auth-banner" hidden><div><strong data-zh="Supabase 已配置" data-en="Supabase is configured">Supabase 已配置</strong><span data-zh="登入后启用跨设备同步、真实课件存储和后台 Push。" data-en="Sign in to enable cross-device sync, persistent courseware and background push.">登入后启用跨设备同步、真实课件存储和后台 Push。</span></div><button class="button small" data-action="open-auth"><span data-zh="登入" data-en="Sign in">登入</span></button></div>
+    <section id="content" class="content" aria-live="polite"></section>
+  </main>
+
+  <nav class="mobile-nav">
+    <button class="mobile-nav-item active" data-view="today"><span>⌂</span><small data-zh="今天" data-en="Today">今天</small></button>
+    <button class="mobile-nav-item" data-view="courses"><span>▣</span><small data-zh="课程" data-en="Courses">课程</small></button>
+    <button class="mobile-add" data-action="add-task">+</button>
+    <button class="mobile-nav-item" data-view="calendar"><span>□</span><small data-zh="日历" data-en="Calendar">日历</small></button>
+    <button class="mobile-nav-item" data-view="settings"><span>⚙</span><small data-zh="更多" data-en="More">更多</small></button>
+  </nav>
+</div>
+
+<dialog id="authDialog" class="modal auth-modal">
+  <div class="modal-card auth-card">
+    <div class="modal-header"><div><p class="eyebrow" data-zh="账户与同步" data-en="Account & sync">账户与同步</p><h2 data-zh="Teaching Tracker 登入" data-en="Sign in to Teaching Tracker">Teaching Tracker 登入</h2></div><button class="icon-button" type="button" data-close="authDialog">×</button></div>
+    <div id="authConfigNotice" class="notice" hidden></div>
+    <section id="authLoggedOut">
+      <div class="auth-tabs" role="tablist">
+        <button type="button" class="auth-tab active" data-auth-tab="login" data-zh="登入" data-en="Sign in">登入</button>
+        <button type="button" class="auth-tab" data-auth-tab="signup" data-zh="注册" data-en="Create account">注册</button>
+        <button type="button" class="auth-tab" data-auth-tab="magic" data-zh="Magic Link" data-en="Magic Link">Magic Link</button>
+      </div>
+      <form id="passwordLoginForm" class="auth-panel grid" data-auth-panel="login">
+        <label><span data-zh="邮箱" data-en="Email">邮箱</span><input name="email" type="email" required autocomplete="email" placeholder="lecturer@university.edu"></label>
+        <label><span data-zh="密码" data-en="Password">密码</span><input name="password" type="password" required minlength="6" autocomplete="current-password" data-zh-placeholder="请输入密码" data-en-placeholder="Enter password" placeholder="请输入密码"></label>
+        <button class="button primary" type="submit"><span data-zh="登入" data-en="Sign in">登入</span></button>
+        <button class="text-button auth-link" type="button" data-action="reset-password"><span data-zh="忘记密码？发送重置邮件" data-en="Forgot password? Send reset email">忘记密码？发送重置邮件</span></button>
+      </form>
+      <form id="signupForm" class="auth-panel grid" data-auth-panel="signup" hidden>
+        <label><span data-zh="姓名 / 显示名称" data-en="Name / display name">姓名 / 显示名称</span><input name="displayName" autocomplete="name" data-zh-placeholder="例如：王老师" data-en-placeholder="e.g. Dr. Wang" placeholder="例如：王老师"></label>
+        <label><span data-zh="邮箱" data-en="Email">邮箱</span><input name="email" type="email" required autocomplete="email" placeholder="lecturer@university.edu"></label>
+        <label><span data-zh="密码" data-en="Password">密码</span><input name="password" type="password" required minlength="6" autocomplete="new-password" data-zh-placeholder="至少 6 位" data-en-placeholder="At least 6 characters" placeholder="至少 6 位"></label>
+        <button class="button primary" type="submit"><span data-zh="创建账户" data-en="Create account">创建账户</span></button>
+      </form>
+      <form id="magicLinkForm" class="auth-panel grid" data-auth-panel="magic" hidden>
+        <p class="subtle" data-zh="无需密码。系统会把一次性登入链接发送到你的邮箱。" data-en="No password needed. A one-time sign-in link will be sent to your email.">无需密码。系统会把一次性登入链接发送到你的邮箱。</p>
+        <label><span data-zh="邮箱" data-en="Email">邮箱</span><input name="email" type="email" required autocomplete="email" placeholder="lecturer@university.edu"></label>
+        <button class="button primary" type="submit"><span data-zh="发送 Magic Link" data-en="Send Magic Link">发送 Magic Link</span></button>
+      </form>
+      <div class="auth-demo-row"><span class="subtle" data-zh="暂时不登入？" data-en="Not ready to sign in?">暂时不登入？</span><button type="button" class="button ghost" data-close="authDialog"><span data-zh="继续使用 Local Demo" data-en="Continue with Local Demo">继续使用 Local Demo</span></button></div>
+    </section>
+    <section id="authLoggedIn" hidden>
+      <div class="account-summary"><div class="account-avatar">TT</div><div><strong id="authUserName">Teaching Tracker</strong><span id="authUserEmail"></span></div></div>
+      <div class="info-list"><div class="info-row"><span data-zh="数据模式" data-en="Data mode">数据模式</span><strong>Supabase Cloud</strong></div><div class="info-row"><span data-zh="同步状态" data-en="Sync status">同步状态</span><strong data-zh="已连接" data-en="Connected">已连接</strong></div></div>
+      <button class="button" type="button" data-action="sign-out"><span data-zh="退出登入" data-en="Sign out">退出登入</span></button>
+    </section>
+    <section id="authRecovery" hidden>
+      <div class="notice" data-zh="你正在重置密码。请输入新的密码。" data-en="You are resetting your password. Enter a new password below.">你正在重置密码。请输入新的密码。</div>
+      <form id="passwordRecoveryForm" class="grid">
+        <label><span data-zh="新密码" data-en="New password">新密码</span><input name="password" type="password" required minlength="6" autocomplete="new-password"></label>
+        <button class="button primary" type="submit"><span data-zh="更新密码" data-en="Update password">更新密码</span></button>
+      </form>
+    </section>
+  </div>
+</dialog>
+
+<dialog id="taskDialog" class="modal"><form id="taskForm" class="modal-card">
+  <div class="modal-header"><div><p class="eyebrow" data-zh="快速添加" data-en="Quick add">快速添加</p><h2 data-zh="新增 To Do" data-en="Add To Do">新增 To Do</h2></div><button class="icon-button" type="button" data-close="taskDialog">×</button></div>
+  <label><span data-zh="任务名称" data-en="Task title">任务名称</span><input name="title" required maxlength="160" data-zh-placeholder="例如：更新 Week 5 PPT" data-en-placeholder="e.g. Update Week 5 PPT" placeholder="例如：更新 Week 5 PPT"></label>
+  <div class="form-grid two"><label><span data-zh="课程" data-en="Course">课程</span><select name="courseId" id="taskCourseSelect"></select></label><label><span data-zh="优先级" data-en="Priority">优先级</span><select name="priority"><option value="high" data-zh="高" data-en="High">高</option><option value="medium" selected data-zh="中" data-en="Medium">中</option><option value="low" data-zh="低" data-en="Low">低</option></select></label></div>
+  <div class="form-grid two"><label><span data-zh="截止时间" data-en="Due date & time">截止时间</span><input name="dueAt" type="datetime-local"></label><label><span data-zh="提醒" data-en="Reminder">提醒</span><select name="reminderMinutes"><option value="" data-zh="不提醒" data-en="No reminder">不提醒</option><option value="1440" data-zh="提前 1 天" data-en="1 day before">提前 1 天</option><option value="120" data-zh="提前 2 小时" data-en="2 hours before">提前 2 小时</option><option value="60" selected data-zh="提前 1 小时" data-en="1 hour before">提前 1 小时</option><option value="15" data-zh="提前 15 分钟" data-en="15 minutes before">提前 15 分钟</option></select></label></div>
+  <div class="form-grid two"><label><span data-zh="重复" data-en="Repeat">重复</span><select name="recurrence"><option value="none" selected data-zh="不重复" data-en="Does not repeat">不重复</option><option value="weekly" data-zh="每周" data-en="Weekly">每周</option></select></label><label><span data-zh="备注" data-en="Notes">备注</span><textarea name="notes" rows="3" data-zh-placeholder="可选" data-en-placeholder="Optional" placeholder="可选"></textarea></label></div>
+  <div class="modal-actions"><button class="button ghost" type="button" data-close="taskDialog"><span data-zh="取消" data-en="Cancel">取消</span></button><button class="button primary" type="submit"><span data-zh="保存任务" data-en="Save task">保存任务</span></button></div>
+</form></dialog>
+
+<dialog id="courseDialog" class="modal"><form id="courseForm" class="modal-card">
+  <div class="modal-header"><div><p class="eyebrow" data-zh="课程设置" data-en="Course setup">课程设置</p><h2 data-zh="新增课程" data-en="New course">新增课程</h2></div><button class="icon-button" type="button" data-close="courseDialog">×</button></div>
+  <div class="form-grid two"><label><span data-zh="课程代码" data-en="Course code">课程代码</span><input name="code" required placeholder="STAT 301"></label><label><span data-zh="课程名称" data-en="Course name">课程名称</span><input name="name" required placeholder="Probability & Statistics"></label></div>
+  <div class="form-grid two"><label><span data-zh="教室" data-en="Room">教室</span><input name="room" placeholder="Room 204"></label><label><span data-zh="颜色" data-en="Color">颜色</span><select name="color"><option value="indigo">Indigo</option><option value="emerald">Emerald</option><option value="amber">Amber</option><option value="rose">Rose</option><option value="sky">Sky</option></select></label></div>
+  <div class="form-grid two"><label><span data-zh="星期" data-en="Day">星期</span><select name="weekday"><option value="1" data-zh="周一" data-en="Monday">周一</option><option value="2" data-zh="周二" data-en="Tuesday">周二</option><option value="3" data-zh="周三" data-en="Wednesday">周三</option><option value="4" data-zh="周四" data-en="Thursday">周四</option><option value="5" data-zh="周五" data-en="Friday">周五</option><option value="6" data-zh="周六" data-en="Saturday">周六</option><option value="0" data-zh="周日" data-en="Sunday">周日</option></select></label><label><span data-zh="上课时间" data-en="Class time">上课时间</span><input name="time" type="time" value="14:00"></label></div>
+  <div class="modal-actions"><button class="button ghost" type="button" data-close="courseDialog"><span data-zh="取消" data-en="Cancel">取消</span></button><button class="button primary" type="submit"><span data-zh="创建课程" data-en="Create course">创建课程</span></button></div>
+</form></dialog>
+
+<dialog id="sessionDialog" class="modal"><form id="sessionForm" class="modal-card">
+  <div class="modal-header"><div><p class="eyebrow" data-zh="上课课次" data-en="Class session">上课课次</p><h2 data-zh="新增课次" data-en="New session">新增课次</h2></div><button class="icon-button" type="button" data-close="sessionDialog">×</button></div>
+  <input type="hidden" name="courseId"><div class="form-grid two"><label><span data-zh="周次" data-en="Week">周次</span><input name="weekNo" type="number" min="1" max="30" required></label><label><span data-zh="日期时间" data-en="Date & time">日期时间</span><input name="startsAt" type="datetime-local" required></label></div>
+  <label><span data-zh="主题" data-en="Topic">主题</span><input name="topic" required placeholder="Probability Distribution"></label><label><span data-zh="教室" data-en="Room">教室</span><input name="room" placeholder="Room 204"></label>
+  <div class="modal-actions"><button class="button ghost" type="button" data-close="sessionDialog"><span data-zh="取消" data-en="Cancel">取消</span></button><button class="button primary" type="submit"><span data-zh="创建课次" data-en="Create session">创建课次</span></button></div>
+</form></dialog>
+
+<dialog id="noteDialog" class="modal"><form id="noteForm" class="modal-card">
+  <div class="modal-header"><div><p class="eyebrow" data-zh="教学记录" data-en="Teaching log">教学记录</p><h2 data-zh="添加教学笔记" data-en="Add teaching note">添加教学笔记</h2></div><button class="icon-button" type="button" data-close="noteDialog">×</button></div>
+  <input type="hidden" name="sessionId"><label><span data-zh="类型" data-en="Type">类型</span><select name="kind"><option value="prep" data-zh="备课笔记" data-en="Prep note">备课笔记</option><option value="reflection" data-zh="课后反思" data-en="Reflection">课后反思</option></select></label><label><span data-zh="内容" data-en="Content">内容</span><textarea name="body" rows="7" required data-zh-placeholder="学生哪里容易卡住？下次要修改什么？" data-en-placeholder="Where did students struggle? What should change next time?" placeholder="学生哪里容易卡住？下次要修改什么？"></textarea></label>
+  <div class="modal-actions"><button class="button ghost" type="button" data-close="noteDialog"><span data-zh="取消" data-en="Cancel">取消</span></button><button class="button primary" type="submit"><span data-zh="保存笔记" data-en="Save note">保存笔记</span></button></div>
+</form></dialog>
+
+<dialog id="uploadDialog" class="modal"><form id="uploadForm" class="modal-card">
+  <div class="modal-header"><div><p class="eyebrow" data-zh="课件" data-en="Courseware">课件</p><h2 data-zh="上传课件" data-en="Upload courseware">上传课件</h2></div><button class="icon-button" type="button" data-close="uploadDialog">×</button></div>
+  <label><span data-zh="课程" data-en="Course">课程</span><select name="courseId" id="uploadCourseSelect"></select></label><label><span data-zh="课次" data-en="Session">课次</span><select name="sessionId" id="uploadSessionSelect"></select></label>
+  <label class="drop-zone"><span data-zh="选择文件" data-en="Choose file">选择文件</span><input name="file" type="file" required accept=".ppt,.pptx,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.md,.json,.xml,.log,.zip,image/*,audio/*,video/*"><span data-zh="PPT / PDF / Word / Excel / 图片 / 文本 / 音视频 / ZIP" data-en="PPT / PDF / Word / Excel / images / text / audio-video / ZIP">PPT / PDF / Word / Excel / 图片 / 文本 / 音视频 / ZIP</span></label>
+  <div class="modal-actions"><button class="button ghost" type="button" data-close="uploadDialog"><span data-zh="取消" data-en="Cancel">取消</span></button><button class="button primary" type="submit"><span data-zh="上传" data-en="Upload">上传</span></button></div>
+</form></dialog>
+
+<dialog id="previewDialog" class="modal preview-modal">
+  <div class="modal-card preview-card">
+    <div class="modal-header preview-header"><div class="preview-title-wrap"><p class="eyebrow" data-zh="课件预览" data-en="Courseware preview">课件预览</p><h2 id="previewTitle">File Preview</h2><p class="subtle" id="previewMeta"></p></div><button class="icon-button" type="button" data-close="previewDialog">×</button></div>
+    <div id="previewStage" class="preview-stage" aria-live="polite"><div class="preview-loading" data-zh="选择一个文件进行预览。" data-en="Choose a file to preview.">选择一个文件进行预览。</div></div>
+    <div class="modal-actions preview-actions"><button class="button ghost" type="button" data-close="previewDialog"><span data-zh="关闭" data-en="Close">关闭</span></button><button class="button primary" type="button" id="previewDownload" data-action="download-file"><span data-zh="下载" data-en="Download">下载</span></button></div>
+  </div>
+</dialog>
+
+<div id="toast" class="toast" role="status"></div>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="./js/config.js"></script><script src="./js/i18n.js"></script><script src="./js/db.js"></script><script src="./js/notifications.js"></script><script src="./js/app.js"></script>
+</body></html>
